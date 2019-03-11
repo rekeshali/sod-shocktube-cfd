@@ -4,14 +4,21 @@ OBJDIR = build
 INCDIR = include
 BINDIR = bin
 
-SRC = %.cpp
-OBJ = %.o
-BIN = shocktube
+SRCEXT  = cpp
+SOURCES = $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+OBJECTS = $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+TARGET  = $(BINDIR)/flow
 
-# $(BINDIR)/$(BIN): $(OBJDIR)/$(OBJ):
-# 	$(CC) -o $(BINDIR)/$(BIN) 
+$(TARGET): $(OBJECTS)
+	$(CC) -o $(TARGET) $^
 
-$(OBJDIR)/$(OBJ): $(SRCDIR)/$(SRC):
-	$(CC) -c -o $@ $<
+$(OBJDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	@mkdir -p $(OBJDIR)
+	$(CC) -c -o $@ $< -I$(INCDIR)
 
+run: $(TARGET)
+	./$(TARGET)
 
+clean: 
+	@echo " Cleaning..."
+	rm -rf $(OBJDIR) $(TARGET)
