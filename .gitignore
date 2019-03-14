@@ -1,4 +1,5 @@
 build/*
 bin/flow
 doc*
-
+prac*
+out
