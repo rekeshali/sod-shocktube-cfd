@@ -15,7 +15,7 @@ class Space {
 		Space(int, double, double);
 		void init(double *, double *); // fill state and flux grid with IC's
 		void updateFuture(int, Mat);
-		void updateBounds(void);
+		void updateBounds(double);
 		void updatePresent(void);
 		void print(std::ofstream&);
 		Mat T, Lam, Tinv;

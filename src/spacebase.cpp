@@ -40,8 +40,11 @@ void Space::updateFuture(int j, Mat qn){
 
 }
 
-void Space::updateBounds(){
-	memcpy(qnew, qnow, jd*dims*sizeof(double));
+void Space::updateBounds(double alpha){
+// 	memcpy(qnew, qnow, jd*dims*sizeof(double));
+	int jl; int jr = jd-1;
+	updateFuture(jl, q(jl) - (f(jl+1) - (A(jl+1)*q(jl+1) - A(jl)*q(jl)*2))*alpha);
+	updateFuture(jr, q(jr) - (f(jr-1)*(-1) - (A(jr-1)*q(jr-1) - A(jr)*q(jr)*2))*alpha);
 // 	qnew[0] = qnew[dims + 0];
 // 	qnew[1] = qnew[dims + 1];
 // 	qnew[2] = qnew[dims + 2];

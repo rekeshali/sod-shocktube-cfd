@@ -20,5 +20,5 @@ run: $(TARGET)
 	./$(TARGET)
 
 clean: 
-	@echo " Cleaning..."
+	@echo "Cleaning..."
 	rm -rf $(OBJDIR) $(TARGET)

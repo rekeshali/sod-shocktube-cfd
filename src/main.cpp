@@ -30,7 +30,7 @@ int main(){
 	jj = 101;
 	tt = 10;
 	ti = 1;
-	sod.updateBounds();
+// 	sod.updateBounds();
 	for(int t = 0; t < td; t++){
 		if(t%ti == 0 && t < tt){
 			cout << "Time=" << t << endl;
@@ -62,7 +62,7 @@ int main(){
 				}	
 			}
 		}
-// 		sod.updateBounds();
+		sod.updateBounds(dt/(2*dx));
 		sod.updatePresent();
 		if(t%ti == 0 && t < tt){
 			cout << "After update:" << endl;
