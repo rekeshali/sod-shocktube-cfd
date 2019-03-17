@@ -1,14 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-// #include "io.hpp"
+#include "io.hpp"
 #include "matrix.hpp"
 #include "state.hpp"
+#include "space.hpp"
 #include "solver.hpp"
 using namespace std;
-
-
-
 int main(){
 	double dx = 0.005;
 	double dt = 0.0005;
@@ -27,25 +25,14 @@ int main(){
 	State Q(jd, dof, gam, R);
 	Q.init(ICL, ICR);
 
-	ofstream myfile ("out");
-	myfile << td+1 << " " << jd << endl;
-	for (int j = 0; j < jd; j ++){
-		myfile << Q(j,0) << " " << Q(j,1) << " " << Q(j,2) << endl;
-	}
-	int jj, tt, ti;
-	jj = 101;
-	tt = 10;
-	ti = 1;
-// 	File myfile(jd, td);	
-	Solver sod(jd, dof, dx, dt);	
-	for(int t = 0; t < td; t++){
-		sod.FVS(Q);
-		for (int j = 0; j < jd; j ++){
-			myfile << Q(j,0) << " " << Q(j,1) << " " << Q(j,2) << endl;
-		}
-// 		myfile.out(Q);
-	}
+	STDIO IO("out");
+	IO.stateToFile(Q);
 
-	myfile.close();
+	Space sod(jd, dof, dx);	
+	for(int t = 0; t < td; t++){
+		sod.StegerWarming(Q);
+		IO.stateToFile(Q);
+	}
+	IO.close();
 	return 0;
 }

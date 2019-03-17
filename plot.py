@@ -19,12 +19,16 @@ class Sod:
     def read(self, fname):
         data = []
         f = open(fname,'r')
-        td, jd = list(map(int, f.readline().split()))
-        self.x = np.arange(0, 1, 1/jd)
+#         td, jd = list(map(int, f.readline().split()))
         for line in f:
-            data.append(list(map(float, line.split())))
+            point = list(map(float, line.split()))
+            if len(point) > 2:
+                data.append(list(map(float, line.split())))
+            else:
+                td, jd = list(map(int, point))
         self.data = np.array(data).reshape((td,jd,3))
         self.td, self.jd = [td, jd]
+        self.x = np.arange(0, 1, 1/jd)
         return
 
     def init(self):

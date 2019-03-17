@@ -2,51 +2,49 @@
 #include "state.hpp"
 #include "solver.hpp"
 
-Solver::Solver(int a, int b, double c, double d){
-	jd = a; dof = b; dx = c; dt = d;
-	init();
+Solver::Solver(int a, double b, double c, double d){
+	// Initializing solver
+	dof  = a; dx = b; L = c; CFL = d;
+	jd   = int(L/dx);
+	time = 0.0;
+	// Initializing local point matrices
+	qn.size(dof,1);
+	q. size(dof,1);
+	f. size(dof,1);
+	Qn.size(jd,dof);
 }
 
-void Solver::init(){
-	// State
-	qn. size(dof,1); // new time
-	qj. size(dof,1);
-	qjp.size(dof,1);
-	qjm.size(dof,1);
-	// Jacobian
-	Aj. size(dof,dof);
-	Ajp.size(dof,dof);
-	Ajm.size(dof,dof);
-	// Flux
-	fjp.size(dof,1);
-	fjm.size(dof,1);
-}
-
-void Solver::FVS(State & Q){
-	Mat F = Q.flux();
-	for(int j = 1; j < jd - 1; j++){
-		// localize large matrices by point
-		// State
-		qj  &= Q[ j ];
-		qjp &= Q[j+1];
-		qjm &= Q[j-1];
-		// Jacobian
-		Aj  = Q.absA(Q[ j ]);
-		Ajp = Q.absA(Q[j+1]);
-		Ajm = Q.absA(Q[j-1]);
-		// Flux
-		fjp &= F[j+1];
-		fjm &= F[j-1];
-		// Local update
-		qn = qj - (dt/(2*dx)) * (fjp - fjm - ( Ajp*qjp -2*Aj*qj + Ajm*qjm ));
-		Q.save(j, qn); // Save local update
+void Solver::timeMarch(State& Q){
+	updateDt();
+	Q.updateFlux();
+	for(j = 1; j < jd-1; j++){
+		q &= Q[j];
+		// f = stegerW
+		qn = q - (dt/(2*dx))*f;
+		Q.updateFuture(j, qn);
 	}
-	// Left boundary
-	qn = Q[1];
-	Q.save(0, qn);
-	// Right boundary
-	qn = Q[jd-2];
-	Q.save(jd-1, qn);
-	// Replace old state
-	Q.march();
+	// Left B
+	// Right B
+	updatePresent();
+	time += dt;
+}
+
+double Solver::timeElapsed(){
+	return time;
+}
+
+void Solver::updateDt(){
+	// ucmax = something;
+	// dt = CFL*dx/abs(ucmax);
+	dt = 0.0005;
+}
+
+void Solver::updateFuture(){
+	Qn(j,0) = qn(0,0);
+	Qn(j,1) = qn(1,0);
+	Qn(j,2) = qn(2,0);
+}
+
+void Solver::updatePresent(){
+	
 }
