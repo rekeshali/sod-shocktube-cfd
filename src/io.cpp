@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "state.hpp"
+#include "shocktube.hpp"
 #include "io.hpp"
 using namespace std;
 
@@ -9,14 +9,14 @@ STDIO::STDIO(const char * fname){
 	jd = 0; td = 0;
 }
 
-void STDIO::stateToFile(State& Q){
+void STDIO::stateToFile(ShockTube& Sod){
 	if(jd == 0){
-		jd = Q.r();
+		jd = Sod.Q.r();
 	}
 	for(j = 0; j < jd; j++){
-		stateFile << Q(j,0) << " ";
-		stateFile << Q(j,1) << " ";
-		stateFile << Q(j,2) << endl;
+		stateFile << Sod.Q(j,0) << " ";
+		stateFile << Sod.Q(j,1) << " ";
+		stateFile << Sod.Q(j,2) << endl;
 	}
 	td++;
 }

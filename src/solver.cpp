@@ -1,30 +1,45 @@
 #include "matrix.hpp"
-#include "state.hpp"
+#include "shocktube.hpp"
 #include "solver.hpp"
+#include "space.hpp"
+#include <iostream>
+using namespace std;
+int Solver::dof = 3;
 
-Solver::Solver(int a, double b, double c, double d){
+Solver::Solver(ShockTube& a, double b){
 	// Initializing solver
-	dof  = a; dx = b; L = c; CFL = d;
-	jd   = int(L/dx);
+	Sod  = &a;
+	CFL  = b;
+	jd   = Sod->jd;
+	dx   = Sod->dx;
 	time = 0.0;
-	// Initializing local point matrices
+	// Initialize future state
+	Qn.size(jd,dof);
+	// Initialize local state/flux
 	qn.size(dof,1);
 	q. size(dof,1);
 	f. size(dof,1);
-	Qn.size(jd,dof);
+	// Initialize space discretizer
+	Spatial.spatialScheme(*Sod, "StegerWarming");
 }
 
-void Solver::timeMarch(State& Q){
+void Solver::timeMarch(){
 	updateDt();
-	Q.updateFlux();
+	Sod->updateFlux();
 	for(j = 1; j < jd-1; j++){
-		q &= Q[j];
-		// f = stegerW
+		q &= Sod->Q[j];
+		f = Spatial.splitFlux(j);
 		qn = q - (dt/(2*dx))*f;
-		Q.updateFuture(j, qn);
+		updateFuture();
 	}
 	// Left B
+	j = 0;
+	qn = Sod->Q[1];
+	updateFuture();
 	// Right B
+	j = jd - 1;
+	qn = Sod->Q[jd-2];
+	updateFuture();
 	updatePresent();
 	time += dt;
 }
@@ -46,5 +61,5 @@ void Solver::updateFuture(){
 }
 
 void Solver::updatePresent(){
-	
+	memcpy(Sod->Q[0], Qn[0], jd*dof*sizeof(double));	
 }

@@ -1,19 +1,23 @@
 #ifndef SOLVER
 #define SOLVER
+#include "shocktube.hpp"
+#include "space.hpp"
 class Solver {
 	protected:
-		Mat Qn, F;
+		Mat Qn;
 		Mat qn, q, f;
-		int j, jd, dof;
+		ShockTube * Sod;
+		Space Spatial;
+		int j, jd;
+		static int dof;
 		double L, time;
 		double dx, dt, ucmax, CFL;
 	public:
-		Solver(int, double, double, double);
-		void timeMarch(State&);
+		Solver(ShockTube&, double);
+		void timeMarch();
 		double timeElapsed(void);
 		void updateDt(void);
 		void updateFuture(void);
 		void updatePresent(void);
-
 };
 #endif

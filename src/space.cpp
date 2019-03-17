@@ -1,90 +1,121 @@
 #include <cmath>
+#include <cstring>
 #include "matrix.hpp"
-#include "state.hpp"
 #include "space.hpp"
+#include "shocktube.hpp"
+#include <iostream>
+using namespace std;
 
-Space::Space(int a, int b, double c){
-	jd = a; dof = b; dx = c;
-	init();
-}
+int Space::dof = 3;
 
-void Space::init(){
-	// State
-	qn. size(dof,1); // new time
-	qj. size(dof,1);
-	qjp.size(dof,1);
-	qjm.size(dof,1);
-	qroe.size(dof,1);
+void Space::spatialScheme(ShockTube& a, const char * b){
+	Sod = &a;
+	method = b;
+	gam = Sod->gam;
+	// Shocktube
+	q. size(dof,1);
+	qp.size(dof,1);
+	qm.size(dof,1);
 	// Jacobian
-	Aj. size(dof,dof);
-	Ajp.size(dof,dof);
-	Ajm.size(dof,dof);
+	T. size(dof,dof);
+	L. size(dof,dof);
+	L. zeros();
+	Ti.size(dof,dof);
+	A. size(dof,dof);
+	Ap.size(dof,dof);
+	Am.size(dof,dof);
 	// Flux
-	fjp.size(dof,1);
-	fjm.size(dof,1);
+	fp.size(dof,1);
+	fm.size(dof,1);
 }
-
-void Space::StegerWarming(State & Q){
-	Q.updateFlux();
-	dt = 0.0005;
-	for(int j = 1; j < jd - 1; j++){
-		// localize large matrices by point
-		// State
-		qj  &= Q[ j ];
-		qjp &= Q[j+1];
-		qjm &= Q[j-1];
-		// Jacobian
-		Aj  = Q.absA(Q[ j ]);
-		Ajp = Q.absA(Q[j+1]);
-		Ajm = Q.absA(Q[j-1]);
-		// Flux
-		fjp &= Q.F[j+1];
-		fjm &= Q.F[j-1];
-		// Local update
-		qn = qj - (dt/(2*dx)) * (fjp - fjm - ( Ajp*qjp -2*Aj*qj + Ajm*qjm ));
-		Q.updateFuture(j, qn); // Save local update
+// Redirect flux splitting function
+Mat Space::splitFlux(int j){
+	if( strncmp(method,"StegerWarming",6) == 0){
+		return StegerWarming(j);
 	}
-	// Left boundary
-	qn = Q[1];
-	Q.updateFuture(0, qn);
-	// Right boundary
-	qn = Q[jd-2];
-	Q.updateFuture(jd-1, qn);
-	// Replace old state
-	Q.updatePresent();
+	else if( strncmp(method,"Roe",3) == 0){
+		return StegerWarming(j);
+	}
+	else if( strncmp(method,"HLL",3) == 0){
+		return StegerWarming(j);
+	}
+	else{
+		cout << "ERROR: Choose an available flux splitting scheme--StegerWarming, Roe, or HLL." << endl;
+		exit(-1);
+	}
+}
+//##################### STEGER WARMING ##############################
+Mat Space::StegerWarming(int j){
+	// Space
+	q  &= Sod->Q[ j ];
+	qp &= Sod->Q[j+1];
+	qm &= Sod->Q[j-1];
+	// Jacobian
+	A  = absA(Sod->Q[ j ]);
+	Ap = absA(Sod->Q[j+1]);
+	Am = absA(Sod->Q[j-1]);
+	// Flux
+	fp &= Sod->F[j+1];
+	fm &= Sod->F[j-1];
+	return fp - fm - ( Ap*qp - 2*A*q + Am*qm );
 }
 
-void Space::Roe(State & Q){
-// 	Q.updateFlux();
-// 	for(int j = 1; j < jd - 1; j++){
-// 		// localize large matrices by point
-// 		// State
-// 		qj  &= Q[ j ];
-// 		qjp &= Q[j+1];
-// 		qjm &= Q[j-1];
-// 		qroe(0,0) = sqrt(qjp(0,0)*qjm(0,0));
-// 		qroe(1,0) = qroe(0,0)*( sqrt(qjp(0,0))*qjp(1,0)/qjp(0,0) + 
-// 								sqrt(qjm(0,0))*qjm(1,0)/qjm(0,0) )/
-// 								(sqrt(qjm(0,0)) + sqrt(qjp(0,0)));
-// 
-// 		qroe(2,0) = qroe(1,0)*( sqrt(qjp(0,0))*qjp(2,0)/qjp(1,0) + 
-// 								sqrt(qjm(0,0))*qjm(2,0)/qjm(1,0) )/
-// 								(sqrt(qjm(0,0)) + sqrt(qjp(0,0)));
-// 		// Jacobian
-// 		Aj  = Q.absA(qroe[0]);
-// 		// Flux
-// 		fjp &= F[j+1];
-// 		fjm &= F[j-1];
-// 		// Local update
-// 		qn = qj - (dt/(2*dx)) * (fjp - fjm - Aj*( qjp - qjm ));
-// 		Q.updateFuture(j, qn); // Save local update
-// 	}
-	// Left boundary
-	qn = Q[1];
-	Q.updateFuture(0, qn);
-	// Right boundary
-	qn = Q[jd-2];
-	Q.updateFuture(jd-1, qn);
-	// Replace old state
-	Q.updatePresent();
+// Decomposed Flux Jacobian
+Mat Space::absA(double * q){
+    double u = vel(q); // useful params
+    double a = sos(q);
+    double h = nth(q);
+// 	cout << "asfd" << endl;
+    //////////////////// T
+    T(0,0) = 1;
+    T(0,1) = 1;
+    T(0,2) = 1;
+    T(1,0) = u-a;
+    T(1,1) = u;
+    T(1,2) = u+a;
+    T(2,0) = h-u*a;
+    T(2,1) = 0.5*u*u;
+    T(2,2) = h-u*a;
+    /////////////////// Lambda
+    L(0,0) = abs(u-a);
+    L(1,1) = u;
+    L(2,2) = abs(u+a);
+    /////////////////// Ti
+    double sml = (gam-1)/(a*a);
+    Ti(0,0) =  (u/(4*a))*(2+(gam-1)*u/a); // begin construction
+    Ti(0,1) = -(1/(2*a))*(1+(gam-1)*u/a);
+    Ti(0,2) =  sml/2;
+    Ti(1,0) =  1-sml*u*u/2;
+    Ti(1,1) =  sml*u;
+    Ti(1,2) = -sml;
+    Ti(2,0) = -(u/(4*a))*(2-(gam-1)*u/a);
+    Ti(2,1) =  (1/(2*a))*(1-(gam-1)*u/a);
+    Ti(2,2) =  sml/2;
+//     T.print(); L.print(); Ti.print();
+    return T*L*Ti;
+}
+
+// // functions for deriving flow props from state
+double Space::rho(double * q){
+    return q[0];
+}
+
+double Space::vel(double * q){
+    return q[1]/q[0];
+}
+
+double Space::nrg(double * q){
+    return q[2]/q[0];
+}
+
+double Space::bar(double * q){
+    return (gam-1)*(q[2] - 0.5*q[1]*q[1]/q[0]);
+}
+
+double Space::sos(double * q){
+    return sqrt(gam*bar(q)/rho(q));
+}
+
+double Space::nth(double * q){
+    return nrg(q) + bar(q)/rho(q);
 }

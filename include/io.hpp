@@ -1,7 +1,7 @@
 #ifndef IO_CLASS
 #define IO_CLASS
 #include <fstream>
-#include "state.hpp"
+#include "shocktube.hpp"
 
 class STDIO {
 	protected:
@@ -10,7 +10,7 @@ class STDIO {
 		std::ofstream stateFile;
 	public:
 		STDIO(const char *);
-		void stateToFile(State&);
+		void stateToFile(ShockTube&);
 		void close(void);
 };
 #endif

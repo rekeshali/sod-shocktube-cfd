@@ -3,8 +3,7 @@
 #include <cmath>
 #include "io.hpp"
 #include "matrix.hpp"
-#include "state.hpp"
-#include "space.hpp"
+#include "shocktube.hpp"
 #include "solver.hpp"
 using namespace std;
 int main(){
@@ -15,23 +14,23 @@ int main(){
 	double R = 1;
 	double gam = 1.4;
 	double CFL = 0.5;
-	int dof = 3;
 	int jd = int(L/dx);
 	int td = int(T/dt);
 
 	double ICL[3] = {1.0, 0.0, 1.0};
 	double ICR[3] = {0.125, 0.0, 0.1};
 
-	State Q(jd, dof, gam, R);
-	Q.init(ICL, ICR);
+	ShockTube Sod(dx, L, gam, R);
+	Sod.fillTube(ICL, ICR);
 
 	STDIO IO("out");
-	IO.stateToFile(Q);
+	IO.stateToFile(Sod);
 
-	Space sod(jd, dof, dx);	
-	for(int t = 0; t < td; t++){
-		sod.StegerWarming(Q);
-		IO.stateToFile(Q);
+	Solver EESW(Sod, CFL);
+
+	while(EESW.timeElapsed() < T){
+		EESW.timeMarch();
+		IO.stateToFile(Sod);
 	}
 	IO.close();
 	return 0;
