@@ -24,25 +24,18 @@ Solver::Solver(ShockTube& a, double b, const char * c){
 	Spatial.spatialScheme(*Sod, c);
 }
 
+// Explicit Euler solver
 void Solver::timeMarch(){
-	updateDt();
-	Sod->updateFlux();
-	for(j = 1; j < jd-1; j++){
-		q &= Sod->Q[j];
-		f = Spatial.splitFlux(j);
-		qn = q - (dt/(2*dx))*f;
-		updateFuture();
+	updateDt();		   // new dt
+	Sod->updateFlux(); // new fluxes
+	for(j = 0; j < jd; j++){
+		q &= Sod->Q[j];			  // local present state
+		f = Spatial.splitFlux(j); // flux splitting
+		qn = q - (dt/dx)*f;		  // local future state
+		updateFuture();			  // save local future state to global
 	}
-	// Left B
-	j = 0;
-	qn = Sod->Q[1];
-	updateFuture();
-	// Right B
-	j = jd - 1;
-	qn = Sod->Q[jd-2];
-	updateFuture();
-	updatePresent();
-	time += dt;
+	updatePresent(); // move glabal future to glabal present
+	time += dt;		 // increase time elapsed
 }
 
 double Solver::timeElapsed(){
@@ -50,6 +43,8 @@ double Solver::timeElapsed(){
 }
 
 void Solver::updateDt(){
+	// Keeps dt in line with CFL
+	// uc = |u| + a
 	ucmax = 0;
 	for(j = 0; j < jd; j++){
 		uc = abs(Sod->vel(Sod->Q[j]))

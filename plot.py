@@ -38,7 +38,7 @@ class Sod:
         self.ax.clear()
         self.ax.plot(self.x, self.data[i,:,self.qplt])  # update the data.
 
-    def plot(self, q=0, fps=20):
+    def gif(self, q=0, fps=20):
         ms = 1000/fps
         self.qplt = q
         self.fig, self.ax = plt.subplots()
@@ -47,4 +47,4 @@ class Sod:
         plt.show()
 
 q = Sod('out')
-q.plot()
+q.gif()

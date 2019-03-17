@@ -11,9 +11,10 @@ class Solver {
 		int j, jd;
 		static int dof;
 		double L, time;
-		double dx, dt, ucmax, CFL;
+		double uc, ucmax;
+		double dx, dt, CFL;
 	public:
-		Solver(ShockTube&, double);
+		Solver(ShockTube&, double, const char *);
 		void timeMarch();
 		double timeElapsed(void);
 		void updateDt(void);

@@ -11,8 +11,43 @@ int Space::dof = 3;
 void Space::spatialScheme(ShockTube& a, const char * b){
 	Sod = &a;
 	method = b;
-	gam = Sod->gam;
-	// Shocktube
+	// Initialize scheme specific vars
+	if( strncmp(method,"S",1) == 0){
+		StegerWarmingInit();
+	}
+	else if( strncmp(method,"R",1) == 0){
+		RoeInit();
+	}
+	else if( strncmp(method,"H",1) == 0){
+		HLLInit();
+	}
+}
+
+// Redirect flux splitting function
+Mat Space::splitFlux(int j){
+	if((j == 0) || (j == (Sod->jd-1))){
+		return fb;
+	}
+	else if( strncmp(method,"S",1) == 0){
+		return StegerWarmingFlux(j);
+	}
+	else if( strncmp(method,"R",1) == 0){
+		return RoeFlux(j);
+	}
+	else if( strncmp(method,"H",1) == 0){
+		return HLLFlux(j);
+	}
+	else{
+		cout << "ERROR: Choose an available flux splitting scheme--";
+		cout << "StegerWarming, Roe, or HLL." << endl;
+		exit(-1);
+	}
+}
+//###################################################################
+//##################### STEGER WARMING ##############################
+//###################################################################
+void Space::StegerWarmingInit(void){
+	// State
 	q. size(dof,1);
 	qp.size(dof,1);
 	qm.size(dof,1);
@@ -21,37 +56,17 @@ void Space::spatialScheme(ShockTube& a, const char * b){
 	L. size(dof,dof);
 	L. zeros();
 	Ti.size(dof,dof);
+	A.size(dof,dof);
 	Ap.size(dof,dof);
 	Am.size(dof,dof);
 	// Flux
 	fp.size(dof,1);
 	fm.size(dof,1);
-	// Scheme Specific vars
-	if( strncmp(method,"StegerWarming",1) == 0){
-		A.size(dof,dof);
-	}
-	else if( strncmp(method,"Roe",1) == 0){
-		qroe.size(dof,1);
-	}
+	fb.size(dof,1);
+	fb.zeros();
 }
-// Redirect flux splitting function
-Mat Space::splitFlux(int j){
-	if( strncmp(method,"StegerWarming",1) == 0){
-		return StegerWarming(j);
-	}
-	else if( strncmp(method,"Roe",1) == 0){
-		return Roe(j);
-	}
-	else if( strncmp(method,"HLL",1) == 0){
-		return StegerWarming(j);
-	}
-	else{
-		cout << "ERROR: Choose an available flux splitting scheme--StegerWarming, Roe, or HLL." << endl;
-		exit(-1);
-	}
-}
-//##################### STEGER WARMING ##############################
-Mat Space::StegerWarming(int j){
+
+Mat Space::StegerWarmingFlux(int j){
 	// Space
 	q  &= Sod->Q[ j ];
 	qp &= Sod->Q[j+1];
@@ -63,23 +78,47 @@ Mat Space::StegerWarming(int j){
 	// Flux
 	fp &= Sod->F[j+1];
 	fm &= Sod->F[j-1];
-	return fp - fm - ( Ap*qp - 2*A*q + Am*qm );
+	return 0.5*(fp - fm - ( Ap*qp - 2*A*q + Am*qm ));
 }
+//###################################################################
 //######################### ROE METHOD ##############################
-Mat Space::Roe(int j){
+//###################################################################
+void Space::RoeInit(void){
+	// State
+	q. size(dof,1);
+	qp.size(dof,1);
+	qm.size(dof,1);
+	qroe.size(dof,1);
+	// Jacobian
+	T. size(dof,dof);
+	L. size(dof,dof);
+	L. zeros();
+	Ti.size(dof,dof);
+	Ap.size(dof,dof);
+	Am.size(dof,dof);
+	// Flux
+	fp.size(dof,1);
+	fm.size(dof,1);
+	fb.size(dof,1);
+	fb.zeros();
+}
+
+Mat Space::RoeFlux(int j){
 	// Space
 	q  &= Sod->Q[ j ];
 	qp &= Sod->Q[j+1];
 	qm &= Sod->Q[j-1];
 	// Jacobian
-	RoeAverage(Sod->Q[j], Sod->Q[j+1]);
+	// Right interface
+	RoeAverage(q[0], qp[0]);
 	Ap = absA(qroe[0]);
-	RoeAverage(Sod->Q[j-1], Sod->Q[j]);
+	// Left Interface
+	RoeAverage(qm[0], q[0]);
 	Am = absA(qroe[0]);
 	// Flux
 	fp &= Sod->F[j+1];
 	fm &= Sod->F[j-1];
-	return fp - fm - ( Ap*(qp-q) - Am*(q-qm) );
+	return 0.5*(fp - fm - ( Ap*(qp-q) - Am*(q-qm) ));
 }
 
 void Space::RoeAverage(double * ql, double * qr){
@@ -88,15 +127,67 @@ void Space::RoeAverage(double * ql, double * qr){
 	qroe(1,0) = (sql*vel(ql) + sqr*vel(qr))/(sql + sqr);
 	qroe(2,0) = (sql*nth(ql) + sqr*nth(qr))/(sql + sqr);
 }
+//###################################################################
 //######################### HLL METHOD ##############################
+//###################################################################
+void Space::HLLInit(void){
+	// State
+	q. size(dof,1);
+	qp.size(dof,1);
+	qm.size(dof,1);
+	// Flux
+	f. size(dof,1);
+	fp.size(dof,1);
+	fm.size(dof,1);
+	fl.size(dof,1);
+	fr.size(dof,1);
+	fb.size(dof,1);
+	fb.zeros();
+}
 
-
+Mat Space::HLLFlux(int j){
+	// Space
+	q  &= Sod->Q[ j ];
+	qp &= Sod->Q[j+1];
+	qm &= Sod->Q[j-1];	
+	// Flux
+	f  &= Sod->F[ j ];
+	fp &= Sod->F[j+1];
+	fm &= Sod->F[j-1];
+	// Right Interface
+	Sl = min(vel(q[0])-sos(q[0]), vel(qp[0])-sos(qp[0]));
+	Sr = min(vel(q[0])+sos(q[0]), vel(qp[0])+sos(qp[0]));
+	if(Sl > 0){
+		fr = f;
+	}
+	else if(Sr < 0){
+		fr = fp;
+	}
+	else{
+		fr = (f*Sr - fp*Sl + Sl*Sr*(qp - q))/(Sr - Sl);
+	}
+	// Left Interface
+	Sl = min(vel(qm[0])-sos(qm[0]), vel(q[0])-sos(q[0]));
+	Sr = min(vel(qm[0])+sos(qm[0]), vel(q[0])+sos(q[0]));
+	if(Sl > 0){
+		fl = fm;
+	}
+	else if(Sr < 0){
+		fl = f;
+	}
+	else{
+		fl = (fm*Sr - f*Sl + Sl*Sr*(q - qm))/(Sr - Sl);
+	}
+	return fr - fl;
+}
+//###################################################################
+//###################################################################
+//###################################################################
 // Decomposed Flux Jacobian
 Mat Space::absA(double * q){
     double u = vel(q); // useful params
     double a = sos(q);
     double h = nth(q);
-// 	cout << "asfd" << endl;
     //////////////////// T
     T(0,0) = 1;
     T(0,1) = 1;
@@ -112,21 +203,20 @@ Mat Space::absA(double * q){
     L(1,1) = u;
     L(2,2) = abs(u+a);
     /////////////////// Ti
-    double sml = (gam-1)/(a*a);
-    Ti(0,0) =  (u/(4*a))*(2+(gam-1)*u/a); // begin construction
-    Ti(0,1) = -(1/(2*a))*(1+(gam-1)*u/a);
+    double sml = (Sod->gam-1)/(a*a);
+    Ti(0,0) =  (u/(4*a))*(2+(Sod->gam-1)*u/a);
+    Ti(0,1) = -(1/(2*a))*(1+(Sod->gam-1)*u/a);
     Ti(0,2) =  sml/2;
     Ti(1,0) =  1-sml*u*u/2;
     Ti(1,1) =  sml*u;
     Ti(1,2) = -sml;
-    Ti(2,0) = -(u/(4*a))*(2-(gam-1)*u/a);
-    Ti(2,1) =  (1/(2*a))*(1-(gam-1)*u/a);
+    Ti(2,0) = -(u/(4*a))*(2-(Sod->gam-1)*u/a);
+    Ti(2,1) =  (1/(2*a))*(1-(Sod->gam-1)*u/a);
     Ti(2,2) =  sml/2;
-//     T.print(); L.print(); Ti.print();
     return T*L*Ti;
 }
 
-// // functions for deriving flow props from state
+// functions for deriving flow props from state
 double Space::rho(double * q){
     return q[0];
 }
@@ -140,11 +230,11 @@ double Space::nrg(double * q){
 }
 
 double Space::bar(double * q){
-    return (gam-1)*(q[2] - 0.5*q[1]*q[1]/q[0]);
+    return (Sod->gam-1)*(q[2] - 0.5*q[1]*q[1]/q[0]);
 }
 
 double Space::sos(double * q){
-    return sqrt(gam*bar(q)/rho(q));
+    return sqrt(Sod->gam*bar(q)/rho(q));
 }
 
 double Space::nth(double * q){

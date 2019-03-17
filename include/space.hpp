@@ -11,15 +11,28 @@ class Space {
 		Mat q, qp, qm;
 		Mat A, Ap, Am;
 		Mat T, L, Ti;
-		Mat fp, fm;
-		double gam;
+		Mat f, fp, fm, fb;
+		// Vars for Roe average
+		Mat qroe;
+		double sql, sqr;
+		// Vars for HLL
+		Mat fl, fr;
+		double Sl, Sr;
 	public:
 		void spatialScheme(ShockTube&, const char *);
 		Mat absA(double *);
 		// All purpose flux splitter calls others
 		Mat splitFlux(int);
 		// StegerWarming
-		Mat StegerWarming(int);
+		void StegerWarmingInit(void);
+		Mat StegerWarmingFlux(int);
+		// Roe Method
+		void RoeInit(void);
+		Mat RoeFlux(int);
+		void RoeAverage(double *, double *);
+		// HLL Method
+		void HLLInit(void);
+		Mat HLLFlux(int);
 	    // functions for deriving flow props from state
         double rho(double *); // rho
         double vel(double *); // u

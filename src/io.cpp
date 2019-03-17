@@ -14,9 +14,9 @@ void STDIO::stateToFile(ShockTube& Sod){
 		jd = Sod.Q.r();
 	}
 	for(j = 0; j < jd; j++){
-		stateFile << Sod.Q(j,0) << " ";
-		stateFile << Sod.Q(j,1) << " ";
-		stateFile << Sod.Q(j,2) << endl;
+		stateFile << Sod.rho(Sod.Q[j]) << " ";
+		stateFile << Sod.vel(Sod.Q[j]) << " ";
+		stateFile << Sod.bar(Sod.Q[j]) << endl;
 	}
 	td++;
 }

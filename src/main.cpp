@@ -7,15 +7,13 @@
 #include "solver.hpp"
 using namespace std;
 int main(){
-	double dx = 0.005;
-	double dt = 0.0005;
-	double L = 1;
-	double T = 0.2;
-	double R = 1;
+	int nframes = 50;
+	double dx  = 0.01;
+	double L   = 1;
+	double T   = 0.2;
+	double R   = 1;
 	double gam = 1.4;
 	double CFL = 0.5;
-	int jd = int(L/dx);
-	int td = int(T/dt);
 
 	double ICL[3] = {1.0, 0.0, 1.0};
 	double ICR[3] = {0.125, 0.0, 0.1};
@@ -26,11 +24,13 @@ int main(){
 	STDIO IO("out");
 	IO.stateToFile(Sod);
 
-	Solver EESW(Sod, CFL, "Roe");
+	Solver EE(Sod, CFL, "H");
 
-	while(EESW.timeElapsed() < T){
-		EESW.timeMarch();
-		IO.stateToFile(Sod);
+	while(EE.timeElapsed() < T){
+		EE.timeMarch();
+		if(EE.timeElapsed() > IO.td*T/nframes){
+			IO.stateToFile(Sod);
+		}
 	}
 	IO.close();
 	return 0;

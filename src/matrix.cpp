@@ -6,6 +6,7 @@
 using namespace std;
 // Construction //
 Mat::Mat(){
+	size(0,0);
 }
 
 Mat::Mat(int a, int b){
