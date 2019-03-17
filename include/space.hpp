@@ -2,7 +2,6 @@
 #define SPACE
 #include "matrix.hpp"
 #include "shocktube.hpp"
-
 class Space {
 	protected:
 		ShockTube * Sod;
@@ -42,4 +41,3 @@ class Space {
         double nth(double *); // h0
 };
 #endif
-

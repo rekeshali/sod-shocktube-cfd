@@ -1,6 +1,4 @@
 #include <cmath>
-#include <cstdlib>
-#include <cstring>
 #include "matrix.hpp"
 #include "shocktube.hpp"
 

@@ -1,6 +1,4 @@
 #include <iostream>
-#include <fstream>
-#include <cmath>
 #include "io.hpp"
 #include "matrix.hpp"
 #include "shocktube.hpp"

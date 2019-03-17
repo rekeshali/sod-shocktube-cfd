@@ -1,6 +1,5 @@
 #ifndef SHOCKTUBE
 #define SHOCKTUBE
-#include <fstream>
 #include "matrix.hpp"
 class ShockTube {
 		static int dof;

@@ -1,10 +1,9 @@
 #include <cmath>
+#include <cstring>
 #include "matrix.hpp"
 #include "shocktube.hpp"
 #include "solver.hpp"
 #include "space.hpp"
-#include <iostream>
-using namespace std;
 int Solver::dof = 3;
 
 Solver::Solver(ShockTube& a, double b, const char * c){
@@ -47,11 +46,8 @@ void Solver::updateDt(){
 	// uc = |u| + a
 	ucmax = 0;
 	for(j = 0; j < jd; j++){
-		uc = abs(Sod->vel(Sod->Q[j]))
-			 + Sod->sos(Sod->Q[j]);
-		if(uc > ucmax){
-			ucmax = uc;
-		}
+		uc = abs(Sod->vel(Sod->Q[j])) + Sod->sos(Sod->Q[j]);
+		if(uc > ucmax){ucmax = uc;}
 	}
 	dt = CFL*dx/ucmax;
 }

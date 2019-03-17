@@ -1,5 +1,6 @@
 #ifndef SOLVER
 #define SOLVER
+#include "matrix.hpp"
 #include "shocktube.hpp"
 #include "space.hpp"
 class Solver {

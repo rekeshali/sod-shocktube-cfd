@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include "shocktube.hpp"
 #include "io.hpp"
