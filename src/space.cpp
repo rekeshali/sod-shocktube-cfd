@@ -21,22 +21,28 @@ void Space::spatialScheme(ShockTube& a, const char * b){
 	L. size(dof,dof);
 	L. zeros();
 	Ti.size(dof,dof);
-	A. size(dof,dof);
 	Ap.size(dof,dof);
 	Am.size(dof,dof);
 	// Flux
 	fp.size(dof,1);
 	fm.size(dof,1);
+	// Scheme Specific vars
+	if( strncmp(method,"StegerWarming",1) == 0){
+		A.size(dof,dof);
+	}
+	else if( strncmp(method,"Roe",1) == 0){
+		qroe.size(dof,1);
+	}
 }
 // Redirect flux splitting function
 Mat Space::splitFlux(int j){
-	if( strncmp(method,"StegerWarming",6) == 0){
+	if( strncmp(method,"StegerWarming",1) == 0){
 		return StegerWarming(j);
 	}
-	else if( strncmp(method,"Roe",3) == 0){
-		return StegerWarming(j);
+	else if( strncmp(method,"Roe",1) == 0){
+		return Roe(j);
 	}
-	else if( strncmp(method,"HLL",3) == 0){
+	else if( strncmp(method,"HLL",1) == 0){
 		return StegerWarming(j);
 	}
 	else{
@@ -59,6 +65,31 @@ Mat Space::StegerWarming(int j){
 	fm &= Sod->F[j-1];
 	return fp - fm - ( Ap*qp - 2*A*q + Am*qm );
 }
+//######################### ROE METHOD ##############################
+Mat Space::Roe(int j){
+	// Space
+	q  &= Sod->Q[ j ];
+	qp &= Sod->Q[j+1];
+	qm &= Sod->Q[j-1];
+	// Jacobian
+	RoeAverage(Sod->Q[j], Sod->Q[j+1]);
+	Ap = absA(qroe[0]);
+	RoeAverage(Sod->Q[j-1], Sod->Q[j]);
+	Am = absA(qroe[0]);
+	// Flux
+	fp &= Sod->F[j+1];
+	fm &= Sod->F[j-1];
+	return fp - fm - ( Ap*(qp-q) - Am*(q-qm) );
+}
+
+void Space::RoeAverage(double * ql, double * qr){
+	sql = sqrt(ql[0]); sqr = sqrt(qr[0]);
+	qroe(0,0) = sql*sqr;
+	qroe(1,0) = (sql*vel(ql) + sqr*vel(qr))/(sql + sqr);
+	qroe(2,0) = (sql*nth(ql) + sqr*nth(qr))/(sql + sqr);
+}
+//######################### HLL METHOD ##############################
+
 
 // Decomposed Flux Jacobian
 Mat Space::absA(double * q){

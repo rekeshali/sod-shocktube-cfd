@@ -26,7 +26,7 @@ int main(){
 	STDIO IO("out");
 	IO.stateToFile(Sod);
 
-	Solver EESW(Sod, CFL);
+	Solver EESW(Sod, CFL, "Roe");
 
 	while(EESW.timeElapsed() < T){
 		EESW.timeMarch();

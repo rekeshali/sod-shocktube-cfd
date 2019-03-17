@@ -1,3 +1,4 @@
+#include <cmath>
 #include "matrix.hpp"
 #include "shocktube.hpp"
 #include "solver.hpp"
@@ -6,7 +7,7 @@
 using namespace std;
 int Solver::dof = 3;
 
-Solver::Solver(ShockTube& a, double b){
+Solver::Solver(ShockTube& a, double b, const char * c){
 	// Initializing solver
 	Sod  = &a;
 	CFL  = b;
@@ -20,7 +21,7 @@ Solver::Solver(ShockTube& a, double b){
 	q. size(dof,1);
 	f. size(dof,1);
 	// Initialize space discretizer
-	Spatial.spatialScheme(*Sod, "StegerWarming");
+	Spatial.spatialScheme(*Sod, c);
 }
 
 void Solver::timeMarch(){
@@ -49,9 +50,15 @@ double Solver::timeElapsed(){
 }
 
 void Solver::updateDt(){
-	// ucmax = something;
-	// dt = CFL*dx/abs(ucmax);
-	dt = 0.0005;
+	ucmax = 0;
+	for(j = 0; j < jd; j++){
+		uc = abs(Sod->vel(Sod->Q[j]))
+			 + Sod->sos(Sod->Q[j]);
+		if(uc > ucmax){
+			ucmax = uc;
+		}
+	}
+	dt = CFL*dx/ucmax;
 }
 
 void Solver::updateFuture(){
