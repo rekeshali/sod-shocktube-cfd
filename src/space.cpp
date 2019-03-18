@@ -12,13 +12,13 @@ void Space::spatialScheme(ShockTube& a, const char * b){
 	Sod = &a;
 	method = b;
 	// Initialize scheme specific vars
-	if( strncmp(method,"S",1) == 0){
+	if( (strncmp(method,"S",1) == 0) || (strncmp(method,"s",1) == 0) ){ 
 		StegerWarmingInit();
 	}
-	else if( strncmp(method,"R",1) == 0){
+	else if( (strncmp(method,"R",1) == 0) || (strncmp(method,"r",1) == 0) ){ 
 		RoeInit();
 	}
-	else if( strncmp(method,"H",1) == 0){
+	else if( (strncmp(method,"H",1) == 0) || (strncmp(method,"h",1) == 0) ){
 		HLLInit();
 	}
 }
@@ -28,13 +28,13 @@ Mat Space::splitFlux(int j){
 	if((j == 0) || (j == (Sod->jd-1))){
 		return fb;
 	}
-	else if( strncmp(method,"S",1) == 0){
+	else if( (strncmp(method,"S",1) == 0) || (strncmp(method,"s",1) == 0) ){ 
 		return StegerWarmingFlux(j);
 	}
-	else if( strncmp(method,"R",1) == 0){
+	else if( (strncmp(method,"R",1) == 0) || (strncmp(method,"r",1) == 0) ){ 
 		return RoeFlux(j);
 	}
-	else if( strncmp(method,"H",1) == 0){
+	else if( (strncmp(method,"H",1) == 0) || (strncmp(method,"h",1) == 0) ){
 		return HLLFlux(j);
 	}
 	else{
