@@ -3,6 +3,22 @@ Sod shocktube using Explicit Euler in time and Steger-Warming, Roe, or HLL in sp
 
 Computation in C++, visualization python.
 
-Instructions: make
+### To Compile: 
 
-./sod method dx cfl outfile
+make
+
+### To Run:
+
+./bin/sod method dx cfl outfile
+
+-or-
+
+py sod.py (change inputs in sod.py)
+
+### To Plot:
+
+Use Sod class in plotsod.py to read and plot from outfile.;
+sod = Sod(outfile);
+sod.plot();
+sod.gif();
+
