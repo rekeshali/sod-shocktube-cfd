@@ -77,6 +77,6 @@ class Sod:
         ani = animation.FuncAnimation( self.fig, self.gif_update,
                 init_func=self.gif_init, frames=self.td, interval=ms)
         if save is not None:
-            plt.savefig(save)
+            ani.save(save, writer='imagemagick', fps=20)
         else:
             plt.show()

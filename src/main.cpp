@@ -29,7 +29,7 @@ int main(int argc, char **argv){
 	// and method. Does work on ShockTube object.
 	Solver EE(Sod, CFL, method);
 	// Let the solver run until all time elapses
-	int nframes = 40; // number of snapshots
+	int nframes = 75; // number of snapshots
 	while(EE.timeElapsed() < T){
 		EE.timeMarch(); // moves forward one time step
 		if(EE.timeElapsed() > IO.td*T/nframes){ // prints nframs times
