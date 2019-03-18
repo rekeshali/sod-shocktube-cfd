@@ -25,4 +25,4 @@ sod.plot()  ## plots final tstep
 
 sod.gif()  ## animates run
 
-sod.plot(save=fname)  ## saves plot or gif
+sod.plot(save=fname)  ## saves plot or gif to fname
