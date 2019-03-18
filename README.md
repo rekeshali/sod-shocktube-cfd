@@ -13,12 +13,16 @@ make
 
 -or-
 
-py sod.py (change inputs in sod.py)
+py sod.py  ## change inputs in sod.py
 
 ### To Plot:
 
-Use Sod class in plotsod.py to read and plot from outfile.;
-sod = Sod(outfile);
-sod.plot();
-sod.gif();
+Use Sod class in plotsod.py to read and plot from outfile.
 
+sod = Sod(outfile)
+
+sod.plot()  ## plots final tstep
+
+sod.gif()  ## animates run
+
+sod.plot(save=fname)  ## saves plot or gif
