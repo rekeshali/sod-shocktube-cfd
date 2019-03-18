@@ -7,22 +7,23 @@ Computation in C++, visualization python.
 
 make
 
+### To Run & Plot:
+
+py sod.py  # change inputs in sod.py
+
 ### To Run:
 
 ./bin/sod method dx cfl outfile
 
--or-
-
-py sod.py  ## change inputs in sod.py
 
 ### To Plot:
 
-Use Sod class in plotsod.py to read and plot from outfile.
+from plotsod import Sod
 
-sod = Sod(outfile)
+sod = Sod(outfile) # read data from outfile
 
-sod.plot()  ## plots final tstep
+sod.plot()  # plots final tstep
 
-sod.gif()  ## animates run
+sod.gif()  # animates run
 
-sod.plot(save=fname)  ## saves plot or gif to fname
+sod.plot(save=fname)  # saves plot or gif to fname
