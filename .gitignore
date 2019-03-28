@@ -1,5 +1,5 @@
 build/*
-bin/flow
+bin/sod
 doc*
 prac*
 out
