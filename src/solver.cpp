@@ -18,7 +18,7 @@ Solver::Solver(ShockTube& a, double b, const char * c){
 	// Initialize local state/flux
 	qn.size(dof,1);
 	q. size(dof,1);
-	f. size(dof,1);
+	df.size(dof,1);
 	// Initialize space discretizer
 	Spatial.spatialScheme(*Sod, c);
 }
@@ -28,10 +28,10 @@ void Solver::timeMarch(){
 	updateDt();		   // new dt
 	Sod->updateFlux(); // new fluxes
 	for(j = 0; j < jd; j++){
-		q &= Sod->Q[j];			  // local present state
-		f = Spatial.splitFlux(j); // flux splitting
-		qn = q - (dt/dx)*f;		  // local future state
-		updateFuture();			  // save local future state to global
+		q &= Sod->Q[j];			   // local present state
+		df = Spatial.splitFlux(j); // flux splitting
+		qn = q - dt*(df/dx);	   // local future state
+		updateFuture();			   // save local future state to global
 	}
 	updatePresent(); // move glabal future to glabal present
 	time += dt;		 // increase time elapsed

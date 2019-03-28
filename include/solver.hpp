@@ -6,7 +6,7 @@
 class Solver {
 	protected:
 		Mat Qn;
-		Mat qn, q, f;
+		Mat qn, q, df;
 		ShockTube * Sod;
 		Space Spatial;
 		int j, jd;
