@@ -124,8 +124,8 @@ Mat Space::RoeFlux(int j){
 void Space::RoeAverage(double * ql, double * qr){
 	sql = sqrt(ql[0]); sqr = sqrt(qr[0]);
 	qroe(0,0) = sql*sqr;
-	qroe(1,0) = (sql*vel(ql) + sqr*vel(qr))/(sql + sqr);
-	qroe(2,0) = (sql*nth(ql) + sqr*nth(qr))/(sql + sqr);
+	qroe(1,0) = qroe(0,0)*(sql*vel(ql) + sqr*vel(qr))/(sql + sqr);
+	qroe(2,0) = qroe(0,0)*(sql*nrg(ql) + sqr*nrg(qr))/(sql + sqr);
 }
 //###################################################################
 //######################### HLL METHOD ##############################
@@ -187,7 +187,7 @@ Mat Space::HLLFlux(int j){
 Mat Space::absA(double * q){
     double u = vel(q); // useful params
     double a = sos(q);
-    double h = nth(q);
+    double h = nth(q); //nth(q)
     //////////////////// T
     T(0,0) = 1;
     T(0,1) = 1;
@@ -197,7 +197,7 @@ Mat Space::absA(double * q){
     T(1,2) = u+a;
     T(2,0) = h-u*a;
     T(2,1) = 0.5*u*u;
-    T(2,2) = h-u*a;
+    T(2,2) = h+u*a;
     /////////////////// Lambda
     L(0,0) = abs(u-a);
     L(1,1) = u;

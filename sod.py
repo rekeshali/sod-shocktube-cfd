@@ -10,7 +10,7 @@ sys.path.append(outdir)
 #################################################################
 ############################ INPUTS #############################
 #################################################################
-method  = 'hll' # steger-warming, roe, or hll
+method  = 'roe' # steger-warming, roe, or hll
 dx  = 0.005
 cfl = 0.5
 outfile = outdir + method + '-dx' + str(dx) + '-cfl' + str(cfl) + '.sod'
@@ -20,7 +20,7 @@ outfile = outdir + method + '-dx' + str(dx) + '-cfl' + str(cfl) + '.sod'
 # Run command
 command = './bin/sod ' + method + ' ' + str(dx) + ' ' + str(cfl) + ' ' + outfile
 start = time.time()
-# os.system(command) # Run C++ exe, must compile with make first
+os.system(command) # Run C++ exe, must compile with make first
 print('Sod CFD with ' + method + ', dx=' + str(dx) + ', and cfl=' + str(cfl) + ' in ' + str(time.time() - start) + ' s')
 # Plot results
 sod = Sod(outfile) # Read the output file
