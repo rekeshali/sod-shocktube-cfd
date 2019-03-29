@@ -1,3 +1,4 @@
+# Rekesh M Ali
 # Sod Shocktube program wrapper
 # Run and save or view plots/gifs
 import os
