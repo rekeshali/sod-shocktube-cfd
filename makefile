@@ -11,6 +11,9 @@ TARGET  = $(BINDIR)/sod
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $(TARGET) $^
+	@mkdir -p results
+	@mkdir -p results/plots
+	@mkdir -p results/gifs
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(OBJDIR)
