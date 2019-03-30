@@ -27,10 +27,11 @@ class Space {
 		Mat StegerWarmingFlux(int);
 		// Roe Method
 		void RoeInit(void);
-		Mat RoeFlux(int);
 		void RoeAverage(double *, double *);
+		Mat RoeFlux(int);
 		// HLL Method
 		void HLLInit(void);
+		Mat HLLInterFlux(int, int);
 		Mat HLLFlux(int);
 	    // functions for deriving flow props from state
         double rho(double *); // rho

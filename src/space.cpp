@@ -103,40 +103,38 @@ void Space::RoeInit(void){
 	fb.zeros();
 }
 
-Mat Space::RoeFlux(int j){
-	// Space
-	q  &= Sod->Q[ j ];
-	qp &= Sod->Q[j+1];
-	qm &= Sod->Q[j-1];
-	// Jacobian
-	// Right interface
-	RoeAverage(q[0], qp[0]);
-	Ap = absA(qroe[0]);
-	// Left Interface
-	RoeAverage(qm[0], q[0]);
-	Am = absA(qroe[0]);
-	// Flux
-	fp &= Sod->F[j+1];
-	fm &= Sod->F[j-1];
-	return 0.5*(fp - fm - ( Ap*(qp-q) - Am*(q-qm) ));
-}
-
 void Space::RoeAverage(double * ql, double * qr){
 	sql = sqrt(ql[0]); sqr = sqrt(qr[0]);
 	qroe(0,0) = sql*sqr;
 	qroe(1,0) = qroe(0,0)*(sql*vel(ql) + sqr*vel(qr))/(sql + sqr);
 	qroe(2,0) = qroe(0,0)*(sql*nrg(ql) + sqr*nrg(qr))/(sql + sqr);
 }
+
+Mat Space::RoeFlux(int j){
+	// Space
+	q  &= Sod->Q[ j ];
+	qp &= Sod->Q[j+1];
+	qm &= Sod->Q[j-1];
+	// Jacobian
+	// Left Interface
+	RoeAverage(qm[0], q[0]);
+	Am = absA(qroe[0]);
+	// Right interface
+	RoeAverage(q[0], qp[0]);
+	Ap = absA(qroe[0]);
+	// Flux
+	fp &= Sod->F[j+1];
+	fm &= Sod->F[j-1];
+	return 0.5*(fp - fm - ( Ap*(qp-q) - Am*(q-qm) ));
+}
 //###################################################################
 //######################### HLL METHOD ##############################
 //###################################################################
 void Space::HLLInit(void){
 	// State
-	q. size(dof,1);
 	qp.size(dof,1);
 	qm.size(dof,1);
 	// Flux
-	f. size(dof,1);
 	fp.size(dof,1);
 	fm.size(dof,1);
 	fl.size(dof,1);
@@ -145,40 +143,33 @@ void Space::HLLInit(void){
 	fb.zeros();
 }
 
-Mat Space::HLLFlux(int j){
-	// Space
-	q  &= Sod->Q[ j ];
-	qp &= Sod->Q[j+1];
-	qm &= Sod->Q[j-1];	
+Mat Space::HLLInterFlux(int l, int r){
+	// State
+	qm &= Sod->Q[l];
+	qp &= Sod->Q[r];
 	// Flux
-	f  &= Sod->F[ j ];
-	fp &= Sod->F[j+1];
-	fm &= Sod->F[j-1];
-	// Right Interface
-	Sl = min(vel(q[0])-sos(q[0]), vel(qp[0])-sos(qp[0]));
-	Sr = min(vel(q[0])+sos(q[0]), vel(qp[0])+sos(qp[0]));
+	fl &= Sod->F[l];
+	fr &= Sod->F[r];
+	// Waves
+	Sl = min(vel(qm[0])-sos(qm[0]), vel(qp[0])-sos(qp[0]));
+	Sr = min(vel(qm[0])+sos(qm[0]), vel(qp[0])+sos(qp[0]));
 	if(Sl > 0){
-		fr = f;
+		return fl;
 	}
 	else if(Sr < 0){
-		fr = fp;
+		return fr;
 	}
 	else{
-		fr = (f*Sr - fp*Sl + Sl*Sr*(qp - q))/(Sr - Sl);
+		return (fl*Sr - fr*Sl + Sl*Sr*(qp - qm))/(Sr - Sl);
 	}
-	// Left Interface
-	Sl = min(vel(qm[0])-sos(qm[0]), vel(q[0])-sos(q[0]));
-	Sr = min(vel(qm[0])+sos(qm[0]), vel(q[0])+sos(q[0]));
-	if(Sl > 0){
-		fl = fm;
-	}
-	else if(Sr < 0){
-		fl = f;
-	}
-	else{
-		fl = (fm*Sr - f*Sl + Sl*Sr*(q - qm))/(Sr - Sl);
-	}
-	return fr - fl;
+}
+
+Mat Space::HLLFlux(int j){
+	// Left interface
+	fm = HLLInterFlux(j-1, j);
+	// Right interface
+	fp = HLLInterFlux(j, j+1);
+	return fp - fm;
 }
 //###################################################################
 //###################################################################

@@ -12,7 +12,7 @@ sys.path.append(outdir)
 ############################ INPUTS #############################
 #################################################################
 method  = 'hll' # steger-warming, roe, or hll
-dx  = 0.01
+dx  = 0.001
 cfl = 0.4
 outfile = method + '-dx' + str(dx) + '-cfl' + str(cfl) + '.sod'
 #################################################################
@@ -20,14 +20,14 @@ outfile = method + '-dx' + str(dx) + '-cfl' + str(cfl) + '.sod'
 #################################################################
 # Run command
 command = ': $(make) && ./bin/sod ' + method + ' ' + str(dx) + ' ' + str(cfl) + ' ' + outdir + outfile
-print('-Sod CFD with ' + method + ', dx=' + str(dx) + ', and cfl=' + str(cfl))
+print('----Sod CFD with ' + method + ', dx=' + str(dx) + ', and cfl=' + str(cfl))
 start = time.time()
 os.system(command) # Run C++ exe, must compile with make first
 sod = Sod(outdir + outfile) # Read the output file
-print('-Shock tube simulated in %.6f s' % sod.cputime)
-print('-C++Program completed in %.6f s' % (time.time() - start))
+print('----Shock tube simulated in %.6f s' % sod.cputime)
+print('----C++Program completed in %.6f s' % (time.time() - start))
 # Plot results
-# sod.plot() # View plot of final tstep
+sod.plot() # View plot of final tstep
 # sod.gif () # View gif of soltuion
 # sod.plot(save=outdir + 'plots/' + outfile[:-4]+'.png') # Save plot of final tstep
 # sod.gif (save=outdir + 'gifs/'  + outfile[:-4]+'.gif') # Gif results and view or save
