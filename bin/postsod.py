@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-
+# Sod class can read data and plot rho, velocity, and Pressure
 class Sod:
     fname = None # filename
     td    = None # frames
@@ -17,11 +17,15 @@ class Sod:
     ylabel = ['Density','Velocity','Pressure']
 
     # object initializer
-    def __init__(self, fname):
-        self.fname = fname
-        self.read(fname)
+    def __init__(self, fname=None):
+        if fname is not None:
+            self.fname = fname
+            self.read(fname)
         return
 
+    ##########################
+    ###### GETTING DATA ######
+    ##########################
     # read data from ouput of sod program
     def read(self, fname):
         data = []
@@ -41,10 +45,14 @@ class Sod:
             self.alims.append(np.max(self.data[-1,:,i]))
         return
 
+    ######################
+    ###### PLOTTING ######
+    ######################
     # initialize figure with axes and format
     def plot_init(self):
         # open fig and make axes
-        self.fig, (self.ax1, self.ax2, self.ax3) = plt.subplots(1,3, figsize=(12,4))
+        self.fig, (self.ax1, self.ax2, self.ax3) = plt.subplots(1,3, \
+                figsize=(12,4))
         self.axes = [self.ax1, self.ax2, self.ax3]
         self.fig.tight_layout() # pretty 
         self.fig.subplots_adjust(left=0.05, bottom=0.12) # pretty
@@ -59,9 +67,10 @@ class Sod:
             ax.set_ylim([0,1.05*self.alims[i]])
 
     # plot a frame and format axes
-    def plot_time(self, t):
+    def plot_time(self, t=-1, clear=True):
         for i, ax in enumerate(self.axes):
-            ax.clear();
+            if clear is True:
+                ax.clear();
             ax.plot(self.x, self.data[t,:,i])
             self.plot_same(ax, i)
 
@@ -74,6 +83,9 @@ class Sod:
         else:
             plt.show()
 
+    #######################
+    ###### ANIMATING ######
+    #######################
     # initialize first frame in gif
     def gif_init(self):
         self.plot_time(0)
@@ -92,3 +104,18 @@ class Sod:
             ani.save(save, writer='imagemagick', fps=20)
         else:
             plt.show()
+##############################################################################
+# Sod class can be used to plot multiple runs on the same axes
+def juxtaplot(fnames, legend=None, savefig=None):
+    sod = Sod()
+    for n, fname in enumerate(fnames): # for all run files
+        sod.read(fname) # read in new data
+        if n is 0: # initialize plot on first iteration
+            sod.plot_init()
+        sod.plot_time(clear=False) # plot new data on top
+    if legend is not None:
+        plt.legend(legend)
+    if savefig is not None:
+        plt.save(savefig)
+    else:
+        plt.show()
