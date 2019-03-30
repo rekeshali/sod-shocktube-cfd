@@ -115,7 +115,7 @@ def juxtaplot(fnames, legend=None, save=None):
         sod.plot_time(clear=False) # plot new data on top
     if legend is not None:
         plt.legend(legend)
-    if savefig is not None:
-        plt.save(sav)
+    if save is not None:
+        plt.save(save)
     else:
         plt.show()
