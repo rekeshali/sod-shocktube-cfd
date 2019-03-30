@@ -1,6 +1,9 @@
 import numpy as np
+from cycler import cycler
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+mpl.rcParams['axes.prop_cycle'] = cycler(color='rgbcmyk')
 # Sod class can read data and plot rho, velocity, and Pressure
 class Sod:
     fname = None # filename
@@ -71,7 +74,7 @@ class Sod:
         for i, ax in enumerate(self.axes):
             if clear is True:
                 ax.clear();
-            ax.plot(self.x, self.data[t,:,i])
+            ax.plot(self.x, self.data[t,:,i],linewidth=1.25)
             self.plot_same(ax, i)
 
     # plot and show or save
@@ -108,14 +111,19 @@ class Sod:
 # Sod class can be used to plot multiple runs on the same axes
 def juxtaplot(fnames, legend=None, save=None):
     sod = Sod()
+    umax = 0
     for n, fname in enumerate(fnames): # for all run files
         sod.read(fname) # read in new data
         if n is 0: # initialize plot on first iteration
             sod.plot_init()
         sod.plot_time(clear=False) # plot new data on top
+        if sod.alims[1] > umax: # find largest vel lim
+            umax  = sod.alims[1]
+    sod.alims[1] = umax
+    sod.plot_same(sod.ax2, 1) # make sure lergest vel fits
     if legend is not None:
         plt.legend(legend)
     if save is not None:
-        plt.save(save)
+        plt.savefig(save)
     else:
         plt.show()
