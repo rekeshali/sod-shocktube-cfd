@@ -26,4 +26,6 @@ sod.plot()  # plots final tstep
 
 sod.gif()  # animates run
 
-sod.plot(save=fname)  # saves plot or gif to fname
+juxtaplot(outfiles, legend) # comparison plot of multiple runs
+
+sod.plot(save=figname)  # saves fig to figname. For plot, gif, or juxtaplot

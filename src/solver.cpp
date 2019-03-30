@@ -51,9 +51,9 @@ void Solver::updateDt(){
 	}
 	dt = CFL*dx/ucmax;
 // 	dt = 0.0005;
-	if(dt*ucmax/dx >= 0.0){
+// 	if(dt*ucmax/dx >= 0.0){
 // 		std::cout<<"cfl="<<dt*ucmax/dx<<std::endl;
-	}
+// 	}
 }
 
 void Solver::updateFuture(){

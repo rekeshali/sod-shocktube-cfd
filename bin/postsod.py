@@ -106,7 +106,7 @@ class Sod:
             plt.show()
 ##############################################################################
 # Sod class can be used to plot multiple runs on the same axes
-def juxtaplot(fnames, legend=None, savefig=None):
+def juxtaplot(fnames, legend=None, save=None):
     sod = Sod()
     for n, fname in enumerate(fnames): # for all run files
         sod.read(fname) # read in new data
@@ -116,6 +116,6 @@ def juxtaplot(fnames, legend=None, savefig=None):
     if legend is not None:
         plt.legend(legend)
     if savefig is not None:
-        plt.save(savefig)
+        plt.save(sav)
     else:
         plt.show()
