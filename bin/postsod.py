@@ -7,6 +7,7 @@ class Sod:
     td    = None
     x     = None
     data  = None
+    cputime = None
     fig = None
     ax1 = None
     ax2 = None
@@ -24,11 +25,12 @@ class Sod:
         data = []
         f = open(fname,'r')
         for line in f:
-            point = list(map(float, line.split()))
-            if len(point) > 2:
-                data.append(list(map(float, line.split())))
+            point = line.split()
+            if len(point) == 3:
+                data.append(list(map(float, point)))
             else:
-                td, jd = list(map(int, point))
+                td, jd = list(map(int, point[1:3]))
+                self.cputime = float(point[3])
         self.data = np.array(data).reshape((td,jd,3))
         self.x = np.arange(0, 1, 1/jd)
         self.alims = []

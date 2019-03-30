@@ -1,3 +1,4 @@
+#include <ctime>
 #include <iostream>
 #include "io.hpp"
 #include "matrix.hpp"
@@ -29,13 +30,17 @@ int main(int argc, char **argv){
 	// and method. Does work on ShockTube object.
 	Solver EE(Sod, CFL, method);
 	// Let the solver run until all time elapses
-	int nframes = 75; // number of snapshots
+	int nframes = 75; // number of snapshots printed
+	int cputi, cputt = 0; // beginning timer
 	while(EE.timeElapsed() < T){
-		EE.timeMarch(); // moves forward one time step
-		if(EE.timeElapsed() > IO.td*T/nframes){ // prints nframs times
+		cputi = clock(); // begin timer
+		EE.timeMarch();  // moves forward one time step
+		cputt += clock() - cputi; // end timer
+		if(EE.timeElapsed() > IO.frames*T/nframes){ // prints nframs times
 			IO.stateToFile(Sod);
 		}
 	}
-	IO.close(); // prints number of tsteps and grid points
+	// print number of frames, grid points, cpu time, and close file
+	IO.close(double(cputt)/CLOCKS_PER_SEC); 	
 	return 0;
 }

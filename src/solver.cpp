@@ -40,7 +40,7 @@ void Solver::timeMarch(){
 double Solver::timeElapsed(){
 	return time;
 }
-
+#include <iostream>
 void Solver::updateDt(){
 	// Keeps dt in line with CFL
 	// uc = |u| + a
@@ -50,6 +50,10 @@ void Solver::updateDt(){
 		if(uc > ucmax){ucmax = uc;}
 	}
 	dt = CFL*dx/ucmax;
+// 	dt = 0.0005;
+	if(dt*ucmax/dx >= 0.0){
+// 		std::cout<<"cfl="<<dt*ucmax/dx<<std::endl;
+	}
 }
 
 void Solver::updateFuture(){

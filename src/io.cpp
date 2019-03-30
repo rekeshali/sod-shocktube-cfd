@@ -5,7 +5,7 @@ using namespace std;
 
 STDIO::STDIO(const char * fname){
 	stateFile.open(fname);
-	jd = 0; td = 0;
+	jd = 0; frames = 0;
 }
 
 void STDIO::stateToFile(ShockTube& Sod){
@@ -17,10 +17,10 @@ void STDIO::stateToFile(ShockTube& Sod){
 		stateFile << Sod.vel(Sod.Q[j]) << " ";
 		stateFile << Sod.bar(Sod.Q[j]) << endl;
 	}
-	td++;
+	frames++;
 }
 
-void STDIO::close(){
-	stateFile << td << " " << jd << endl;
+void STDIO::close(double cputime){
+	stateFile << "# " << frames << " " << jd << " " << cputime << endl;
 }
 

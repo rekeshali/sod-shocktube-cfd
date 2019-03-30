@@ -8,9 +8,9 @@ class STDIO {
 		std::ofstream inputFile;
 		std::ofstream stateFile;
 	public:
-		int j, jd, td;
+		int j, jd, frames;
 		STDIO(const char *);
 		void stateToFile(ShockTube&);
-		void close(void);
+		void close(double);
 };
 #endif

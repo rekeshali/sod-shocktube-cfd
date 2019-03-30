@@ -9,7 +9,7 @@ make
 
 ### To Run & Plot:
 
-py sod.py  # change inputs in sod.py
+py sod.py  # change inputs in sod.py *will run make
 
 ### To Run:
 
