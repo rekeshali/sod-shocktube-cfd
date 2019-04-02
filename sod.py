@@ -14,9 +14,9 @@ from postsod import Sod, juxtaplot
 ################################### INPUTS ####################################
 ###############################################################################
 # Inputs must be in lists
-methods  = ['roe'] # steger-warming, roe, or hll
+methods  = ['hll'] # steger-warming, roe, or hll
 dxs      = [0.01, 0.005, 0.0025]
-cfls     = [0.4]
+cfls     = [0.9]
 ###############################################################################
 ############################### RUN SIMULATION ################################
 ###############################################################################
@@ -48,14 +48,15 @@ for method in methods:
 #           sod.plot(save=outdir + 'plots/' + outfile[:-4]+'.png')
             # Gif results and view or save
 #           sod.gif (save=outdir + 'gifs/'  + outfile[:-4]+'.gif')
+print('-'*50)
 ###############################################################################
 ############################### RUN COMPARISON ################################
 ###############################################################################
 # legend = methods
 legend = list(map(str, dxs))
-for i, l in enumerate(legend):
-        legend[i] = 'dx=' + legend[i]
-juxtaplot(outfiles, legend, save='results/plots/'+method+'dx')
+# for i, l in enumerate(legend):
+#         legend[i] = 'dx=' + legend[i]
+juxtaplot(outfiles, legend)#, save='results/plots/'+method+'dx')
 ###############################################################################
 ################################### END #######################################
 ###############################################################################

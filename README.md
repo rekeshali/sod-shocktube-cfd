@@ -1,5 +1,5 @@
 # sod-shocktube-cfd
-Sod shocktube using Explicit Euler in time and Steger-Warming, Roe, or HLL in space.
+Sod shocktube using Explicit Euler in time and Steger-Warming, Roe, or HLL in space. Traditional initial conditions, constant solution boundaries.
 
 Computation in C++, visualization python.
 
